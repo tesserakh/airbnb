@@ -1,5 +1,7 @@
 from airbnb import crawler
 from airbnb import scraper
+from logging import config
+import logging
 import json
 
 def crawl(locations:list, output_file:str) -> None:
@@ -13,7 +15,7 @@ def crawl(locations:list, output_file:str) -> None:
     fout.close()
     return
 
-def scrape(input_file:str, output_file:str):
+def scrape(input_file:str, output_file:str) -> None:
     with open(input_file, 'r') as fin:
         urls = [url.replace('\n', '') for url in fin.readlines()]
     fin.close()
@@ -22,6 +24,7 @@ def scrape(input_file:str, output_file:str):
     with open(output_file, 'w') as fout:
         json.dump(data, fout)
     fout.close()
+    return
 
 def print_result(data_file:str):
     with open(data_file, 'r') as read_data:
@@ -30,6 +33,8 @@ def print_result(data_file:str):
     return print(json.dumps(data, indent=2))
 
 if __name__ == '__main__':
+    config.fileConfig(fname='config.conf', disable_existing_loggers=False)
+    logging.basicConfig(level=logging.DEBUG)
     locations = [
         'Las Vegas, NV'
     ]

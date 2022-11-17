@@ -1,4 +1,4 @@
-name: scraping-test
+name: scraper-test
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  scraper-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -23,5 +23,7 @@ jobs:
           pip install playwright
           playwright install --with-deps firefox
                   
-      - name: Run scraper
-        run: python main.py
+      - name: Test scraper
+        run: |
+          cd test
+          python scraper.py

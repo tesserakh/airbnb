@@ -4,14 +4,7 @@ from airbnb.settings import HEADLESS
 import logging
 import re
 
-# Logger
-#logging.basicConfig(level=logging.DEBUG)
-log_formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(log_formatter)
-stream_handler.setLevel(logging.DEBUG)
-logger = logging.getLogger(name='scraper')
-logger.addHandler(stream_handler)
+logger = logging.getLogger('scraper')
 
 def airbnb_scrape(urls:list) -> list:
     """ Scrape Airbnb rental details """

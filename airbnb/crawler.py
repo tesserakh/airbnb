@@ -3,14 +3,7 @@ from playwright.sync_api import Page
 from airbnb.settings import HEADLESS
 import logging
 
-# Logger
-# logging.basicConfig(level=logging.DEBUG)
-log_formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(log_formatter)
-stream_handler.setLevel(logging.DEBUG)
-logger = logging.getLogger(name='crawler')
-logger.addHandler(stream_handler)
+logger = logging.getLogger('crawler')
 
 def airbnb_crawl(keywords:list) -> list:
     """ Crawl Airbnb by rental location """
@@ -26,9 +19,9 @@ def airbnb_crawl(keywords:list) -> list:
             try:
                 page.wait_for_selector('div[aria-labelledby=announcement-curtain]')
                 page.locator('button[aria-label=Close]').click()
-                logger.info('Popup closed.')
+                logger.info('Popup closed')
             except:
-                logger.info('No pop-up in current session.')
+                logger.info('No pop-up in current session')
         except Exception as e:
             logger.error(f"Failed to navigate Airbnb home.{str(e)}")
         # location handle
@@ -70,18 +63,21 @@ def navigate_location(query_location:str, page:Page) -> None:
     return
 
 def is_visible_nexpage(page:Page) -> bool:
+    """ Next page appearance check """
     if page.query_selector('a[aria-label=Next]') != None:
         return True
     else:
         return False
 
 def navigate_nextpage(page:Page) -> None:
+    """ Navigate to the next page """
     endpoint = page.query_selector('a[aria-label=Next]').get_attribute('href')
     url = 'https://www.airbnb.com' + endpoint
     page.goto(url, timeout=90000)
     return
 
 def get_page_number(page:Page) -> int:
+    """ Number from active pagination """
     return int(page.query_selector('button[aria-current=page]').inner_text())
 
 def get_item_links(page:Page) -> list:
