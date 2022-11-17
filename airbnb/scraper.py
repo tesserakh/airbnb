@@ -6,6 +6,13 @@ import re
 
 # Logger
 logging.basicConfig(level=logging.DEBUG)
+log_formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+logger = logging.getLogger(name='scraper')
+logger.setLevel(logging.DEBUG)
+# file_handler = logging.FileHandler('logs/scraper.log')
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(log_formatter)
+logger.addHandler(stream_handler)
 
 def airbnb_scrape(urls:list) -> list:
     """ Scrape Airbnb rental details """
@@ -18,10 +25,10 @@ def airbnb_scrape(urls:list) -> list:
             # browse the website
             try:
                 page.goto(url)
-                logging.info(f"GET {url}")
+                logger.info(f"GET {url}")
                 page.wait_for_load_state()
             except Exception as e:
-                logging.error(str(e))
+                logger.error(str(e))
                 continue
             # parse website
             data.append(parse(page))
@@ -55,7 +62,7 @@ def parse(page:Page) -> dict:
         else:
             location = section_location.query_selector_all('section > div')[1].inner_text().strip()
     except Exception as e:
-        logging.warning(f"Failed to get LOCATION, message: {str(e)} ({page.url})")
+        logger.warning(f"Failed to get LOCATION, message: {str(e)} ({page.url})")
     
     # REVIEWS - rating, reviews, specific rating: cleanliness, communication, check-in, accuracy, location, value
     reviews_detail = {}
@@ -91,7 +98,7 @@ def parse(page:Page) -> dict:
                     'reviews': int(reviews)
                 })
         except Exception as e:
-            logging.warning(f'General REVIEWS is not properly parsed:{str(e)} ({page.url})')
+            logger.warning(f'General REVIEWS is not properly parsed:{str(e)} ({page.url})')
             reviews_detail.update({
                 'rating': None,
                 'reviews': None
@@ -102,7 +109,7 @@ def parse(page:Page) -> dict:
             'reviews': None
         })
     else:
-        logging.warning(f'Cannot found REVIEW section: {page.url}')
+        logger.warning(f'Cannot found REVIEW section: {page.url}')
     
     # OVERVIEW / main facitities - number of guest, bedroom, bathroom
     facilities = {}
@@ -121,9 +128,9 @@ def parse(page:Page) -> dict:
                 value = float(1)
                 facilities.update({key:value})
             else:
-                logging.warning(f"Main facilities have different format: {page.url}")
+                logger.warning(f"Main facilities have different format: {page.url}")
     except Exception as e:
-        logging.error(f"Failed to get OVERVIEW: {str(e)} ({page.url})")
+        logger.error(f"Failed to get OVERVIEW: {str(e)} ({page.url})")
     
     # HOST PROFILE - host_name, is_verified, is_superhost, response_rate, response_time, host_languages
     host = {}
@@ -153,12 +160,12 @@ def parse(page:Page) -> dict:
                     # host badge status
                     host.update({'is_superhost':True})
                 else:
-                    #logging.debug(f'Host PROFILE - Passing item "{item}" ({page.url})')
+                    #logger.debug(f'Host PROFILE - Passing item "{item}" ({page.url})')
                     continue
         except Exception as e:
-            logging.warning(f'HOST PROFILE: {str(e)}')
+            logger.warning(f'HOST PROFILE: {str(e)}')
     except Exception as e:
-        logging.error(f'HOST PROFILE: {str(e)}')
+        logger.error(f'HOST PROFILE: {str(e)}')
     
     # PRICE - daily rate
     price = {}
@@ -178,7 +185,7 @@ def parse(page:Page) -> dict:
                 'currency': 'USD',
             })
     except Exception as e:
-        logging.error(f'Failed to get BOOK: {str(e)} ({page.url})')
+        logger.error(f'Failed to get BOOK: {str(e)} ({page.url})')
     
     # CALENDAR - minimum stay, amount of bookings per month
     calendar_info = {'days_booking_per_month': None, 'minimum_stay': None}
@@ -227,7 +234,7 @@ def parse(page:Page) -> dict:
                     else:
                         continue
     except Exception as e:
-        logging.error(f'Failed to get CALENDAR: {str(e)} ({page.url})')
+        logger.error(f'Failed to get CALENDAR: {str(e)} ({page.url})')
     
     # number of pictures
     pictures = {}
@@ -262,7 +269,7 @@ def navigate_scroll(page:Page, x=5, timeout=3000) -> None:
     Positive x is scrolling down, negative x is scrolling up
     """
     a = 1 if x >= 0 else -1
-    # logging.debug(f"Scrolling screen...")
+    # logger.debug(f"Scrolling screen...")
     for i in range((x * a)): # make the range as long as needed
         page.mouse.wheel(0, 15000) # h=0, v=15000
         page.wait_for_timeout(timeout)
