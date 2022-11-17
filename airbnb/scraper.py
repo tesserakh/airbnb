@@ -64,12 +64,13 @@ def parse(page:Page) -> dict:
         try:
             # general rating - average rating, number of reviews
             text_reviews = section_reviews.query_selector('h2 > span').inner_text().strip()
-            if float(re.findall(r'\d{1,}\sreviews?', text_reviews)[0]) > 3:
+            reviews = re.findall(r'\d{1,}\sreviews?', text_reviews)[0]
+            reviews = re.sub(r'reviews?', '', reviews).strip()
+            if int(reviews) > 3:
                 rating = re.findall(r'\d{1}\.\d{1,2}', text_reviews)[0]
-                reviews = re.findall(r'\d{1,}\sreviews?', text_reviews)[0]
                 reviews_detail.update({
                     'rating': float(rating),
-                    'reviews': int(re.sub(r'reviews?', '', reviews).strip()),
+                    'reviews': int(reviews),
                 })
                 # specific rating - cleanliness, communication, check-in, accuracy, location, value
                 rating_specific = section_reviews.query_selector('section > div > div > div')
