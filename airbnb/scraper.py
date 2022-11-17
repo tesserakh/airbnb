@@ -61,28 +61,40 @@ def parse(page:Page) -> dict:
     reviews_detail = {}
     if page.locator('div[data-section-id=REVIEWS_DEFAULT]').count():
         section_reviews = page.query_selector('div[data-section-id=REVIEWS_DEFAULT]')
-        # general rating - average rating, number of reviews
         try:
-            text_reviews = section_reviews.query_selector('h2 > span').inner_text()
-            rating = re.findall(r'\d{1}\.\d{1,2}', text_reviews)[0]
-            reviews = re.findall(r'\d{1,}\sreviews?', text_reviews)[0]
-            reviews_detail.update({
-                'rating': float(rating),
-                'reviews': int(reviews.replace('reviews', '').strip()),
-            })
-        except Exception as e:
-            logging.warning(f'General REVIEWS is not properly parsed: {str(e)} ({page.url})')
-        # specific rating - cleanliness, communication, check-in, accuracy, location, value
-        rating_specific = section_reviews.query_selector('section > div > div > div')
-        rating_specific = rating_specific.query_selector_all('div > div > div')
-        rating_specific = [item.inner_text() for item in rating_specific]
-        for item in rating_specific:
-            if len(item.split('\n')) == 2:
-                reviews_key = 'rating_' + item.split('\n')[0].strip().lower()
-                reviews_val = item.split('\n')[1].strip()
+            # general rating - average rating, number of reviews
+            text_reviews = section_reviews.query_selector('h2 > span').inner_text().strip()
+            if re.findall(r'\d{1,}\sreviews?', text_reviews)[0] > 3:
+                rating = re.findall(r'\d{1}\.\d{1,2}', text_reviews)[0]
+                reviews = re.findall(r'\d{1,}\sreviews?', text_reviews)[0]
                 reviews_detail.update({
-                    reviews_key: float(reviews_val)
+                    'rating': float(rating),
+                    'reviews': int(re.sub(r'reviews?', '', reviews).strip()),
                 })
+                # specific rating - cleanliness, communication, check-in, accuracy, location, value
+                rating_specific = section_reviews.query_selector('section > div > div > div')
+                rating_specific = rating_specific.query_selector_all('div > div > div')
+                rating_specific = [item.inner_text() for item in rating_specific]
+                for item in rating_specific:
+                    if len(item.split('\n')) == 2:
+                        reviews_key = 'rating_' + item.split('\n')[0].strip().lower()
+                        reviews_val = item.split('\n')[1].strip()
+                        reviews_detail.update({
+                            reviews_key: float(reviews_val)
+                        })
+            else:
+                # when number of reviews below 3
+                reviews = text_reviews.replace('reviews', '').replace('review', '').strip()
+                reviews_detail.update({
+                    'rating': None,
+                    'reviews': int(reviews)
+                })
+        except Exception as e:
+            logging.warning(f'General REVIEWS is not properly parsed:{str(e)} ({page.url})')
+            reviews_detail.update({
+                'rating': None,
+                'reviews': None
+            })
     elif page.locator('div[data-section-id=REVIEWS_EMPTY_DEFAULT]').count():
         reviews_detail.update({
             'rating': None,
@@ -90,6 +102,7 @@ def parse(page:Page) -> dict:
         })
     else:
         logging.warning(f'Cannot found REVIEW section: {page.url}')
+    
     # OVERVIEW / main facitities - number of guest, bedroom, bathroom
     facilities = {}
     try:
@@ -100,11 +113,11 @@ def parse(page:Page) -> dict:
             facil = item.inner_text().replace('\u00b7', '').strip().split(' ')
             if len(facil) > 1:
                 key = re.sub(r's$', '', facil[1].strip())
-                value = int(facil[0].strip())
+                value = float(facil[0].strip())
                 facilities.update({key:value})
             elif len(facil) == 1 and facil[0].lower() == 'studio':
                 key = 'studio'
-                value = 1
+                value = float(1)
                 facilities.update({key:value})
             else:
                 logging.warning(f"Main facilities have different format: {page.url}")
