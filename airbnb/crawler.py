@@ -48,8 +48,7 @@ def navigate_home(page:Page) -> None:
 def navigate_location(query_location:str, page:Page) -> None:
     """ Navigate Airbnb web using query location """
     # click search bar
-    #page.wait_for_selector('button > span.dir-ltr', timeout=10000)
-    page.locator('button > span.dir-ltr').get_by_text('Location').click()
+    page.locator('button', has_text='Location').click()
     # input query
     page.wait_for_selector('input#bigsearch-query-location-input', timeout=10000)
     page.fill('input[placeholder="Search destinations"]', query_location)
