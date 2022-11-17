@@ -15,6 +15,10 @@ def airbnb_crawl(keywords:list) -> list:
         # browse the website
         try:
             navigate_home(page)
+            page.wait_for_load_state()
+            # close popup if appears
+            if page.locator('div[aria-labelledby=announcement-curtain]').is_visible():
+                page.locator('button[aria-label=Close]').click()
         except Exception as e:
             logging.error(str(e))
         # location handle
