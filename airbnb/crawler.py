@@ -17,10 +17,14 @@ def airbnb_crawl(keywords:list) -> list:
             navigate_home(page)
             page.wait_for_load_state()
             # close popup if appears
-            if page.locator('div[aria-labelledby=announcement-curtain]').is_visible():
+            try:
+                page.wait_for_selector('div[aria-labelledby=announcement-curtain]')
                 page.locator('button[aria-label=Close]').click()
+                logging.info('Popup closed.')
+            except:
+                logging.info('No pop-up in current session.')
         except Exception as e:
-            logging.error(str(e))
+            logging.error(f"Failed to navigate Airbnb home.{str(e)}")
         # location handle
         item_links = []
         for query in keywords:
@@ -29,6 +33,7 @@ def airbnb_crawl(keywords:list) -> list:
             page.wait_for_timeout(6500)
             item_links += get_item_links(page)
             logging.info(f"Page {get_page_number(page)} of {query}")
+            # pagination handle
             while is_visible_nexpage(page):
                 navigate_nextpage(page)
                 page.wait_for_selector('div[itemprop=itemListElement]')

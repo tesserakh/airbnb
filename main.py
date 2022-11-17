@@ -19,7 +19,7 @@ def scrape():
     with open('url.txt', 'r') as fin:
         urls = [url.replace('\n', '') for url in fin.readlines()]
     fin.close()
-    urls = urls[0:10]
+    # urls = urls[0:10]
     data = scraper.airbnb_scrape(urls)
     with open('data.json', 'w') as fout:
         json.dump(data, fout, indent=2)
