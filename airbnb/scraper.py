@@ -5,13 +5,12 @@ import logging
 import re
 
 # Logger
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 log_formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-logger = logging.getLogger(name='scraper')
-logger.setLevel(logging.DEBUG)
-# file_handler = logging.FileHandler('logs/scraper.log')
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(log_formatter)
+stream_handler.setLevel(logging.DEBUG)
+logger = logging.getLogger(name='scraper')
 logger.addHandler(stream_handler)
 
 def airbnb_scrape(urls:list) -> list:

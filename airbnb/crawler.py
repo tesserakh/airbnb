@@ -6,11 +6,10 @@ import logging
 # Logger
 # logging.basicConfig(level=logging.DEBUG)
 log_formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
-logger = logging.getLogger(name='crawler')
-logger.setLevel(logging.DEBUG)
-# file_handler = logging.FileHandler('logs/crawler.log')
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(log_formatter)
+stream_handler.setLevel(logging.DEBUG)
+logger = logging.getLogger(name='crawler')
 logger.addHandler(stream_handler)
 
 def airbnb_crawl(keywords:list) -> list:
