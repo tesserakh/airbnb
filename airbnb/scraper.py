@@ -64,7 +64,7 @@ def parse(page:Page) -> dict:
         try:
             # general rating - average rating, number of reviews
             text_reviews = section_reviews.query_selector('h2 > span').inner_text().strip()
-            if re.findall(r'\d{1,}\sreviews?', text_reviews)[0] > 3:
+            if float(re.findall(r'\d{1,}\sreviews?', text_reviews)[0]) > 3:
                 rating = re.findall(r'\d{1}\.\d{1,2}', text_reviews)[0]
                 reviews = re.findall(r'\d{1,}\sreviews?', text_reviews)[0]
                 reviews_detail.update({
